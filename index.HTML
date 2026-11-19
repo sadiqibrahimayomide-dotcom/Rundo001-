@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CampusRide — Student Commute & Travel Buddy Board</title>
+  <style>
+    :root {
+      --primary: #0f766e;
+      --primary-dark: #115e59;
+      --accent: #f59e0b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --green-bg: #dcfce7;
+      --green-text: #166534;
+      --red-bg: #fee2e2;
+      --red-text: #991b1b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    /* Navbar */
+    header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0.9rem 1.5rem;
+    }
+
+    .nav-container {
+      max-width: 1150px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .logo {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .logo span {
+      color: var(--text-main);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.25rem;
+      align-items: center;
+    }
+
+    .nav-tab {
+      background: none;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      transition: 0.2s;
+    }
+
+    .nav-tab.active, .nav-tab:hover {
+      color: var(--primary);
+      background: #f0fdfa;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.92rem;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    /* Hero & Search Strip */
+    .hero {
+      background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%);
+      color: white;
+      padding: 2.2rem 1.5rem;
+    }
+
+    .hero-inner {
+      max-width: 1150px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .hero p {
+      color: #ccfbf1;
+      font-size: 0.98rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .filter-bar {
+      background: white;
+      padding: 0.85rem;
+      border-radius: 12px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 0.8rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .filter-bar input {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .filter-bar input:focus {
+      border-color: var(--primary);
+    }
+
+    .category-pills {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      padding: 0.55rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .pill.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1150px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+    }
+
+    .section-header h2 {
+      font-size: 1.25rem;
+    }
+
+    .ride-count {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Ride Cards Grid */
+    .rides-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .ride-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .ride-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.9rem;
+    }
+
+    .status-badge {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      background: var(--green-bg);
+      color: var(--green-text);
+    }
+
+    .status-badge.full {
+      background: var(--red-bg);
+      color: var(--red-text);
+    }
+
+    .type-tag {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--primary);
+      background: #f0fdfa;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid #ccfbf1;
+    }
+
+    .route {
+      font-size: 1.12rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      color: var(--text-main);
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .price {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .note {
+      font-size: 0.9rem;
+      color: #334155;
+      background: #f8fafc;
+      padding: 0.65rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .poster-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.84rem;
+      margin-bottom: 1rem;
+    }
+
+    .verified {
+      color: #0284c7;
+      font-weight: 600;
+    }
+
+    .btn-join {
+      width: 100%;
+      padding: 0.65rem;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-join:hover:not(:disabled) {
+      background: var(--primary-dark);
+    }
+
+    .btn-join:disabled {
+      background: #cbd5e1;
+      color: #64748b;
+      cursor: not-allowed;
+    }
+
+    /* Shuttle & Fares View */
+    .hidden {
+      display: none !important;
+    }
+
+    .fare-table-wrapper {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.94rem;
+    }
+
+    th {
+      background: #f1f5f9;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      z-index: 200;
+    }
+
+    .modal {
+      background: white;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 14px;
+      padding: 1.5rem;
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.1rem;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .form-group {
+      margin-bottom: 0.85rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.92rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+      .filter-bar {
+        grid-template-columns: 1fr;
+      }
+      .category-pills {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header>
+    <div class="nav-container">
+      <div class="logo">Campus<span>Ride</span></div>
+      <div class="nav-links">
+        <button class="nav-tab active" id="tabBoard" onclick="switchTab('board')">Commute Board</button>
+        <button class="nav-tab" id="tabFares" onclick="switchTab('fares')">Shuttle & Fares</button>
+        <button class="btn-primary" onclick="openModal()">+ Post a Ride</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero & Filter Strip -->
+  <section class="hero" id="heroSection">
+    <div class="hero-inner">
+      <h1>Find a Verified Student Ride</h1>
+      <p>Split daily cab fares to town or team up with fellow students heading home for the break.</p>
+      <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="Search pickup or destination (e.g., Main Gate, Oke-Fia, Lagos)..." onkeyup="renderRides()" />
+        <div class="category-pills">
+          <button class="pill active" onclick="setCategory('All', this)">All</button>
+          <button class="pill" onclick="setCategory('Town Split', this)">Town Split</button>
+          <button class="pill" onclick="setCategory('Holiday Travel', this)">Holiday Travel</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main>
+    <!-- View 1: Commute Board -->
+    <div id="boardView">
+      <div class="section-header">
+        <h2>Available Student Trips</h2>
+        <span class="ride-count" id="rideCount">Showing 0 rides</span>
+      </div>
+      <div class="rides-grid" id="ridesGrid"></div>
+    </div>
+
+    <!-- View 2: Shuttle & Fare Guide -->
+    <div id="faresView" class="hidden">
+      <div class="section-header">
+        <h2>Official Campus Shuttle & Local Route Fare Guide</h2>
+      </div>
+      <div class="fare-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Route</th>
+              <th>Transport Mode</th>
+              <th>Standard Fare</th>
+              <th>Peak Hours / Schedule</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Main Gate ➔ Faculty Blocks</strong></td>
+              <td>Campus Shuttle</td>
+              <td>₦100</td>
+              <td>7:30 AM – 6:00 PM (Every 15 mins)</td>
+            </tr>
+            <tr>
+              <td><strong>Main Gate ➔ Ota-Efun Junction</strong></td>
+              <td>Mini-Bus (Korope) / Bike</td>
+              <td>₦200 – ₦300</td>
+              <td>6:30 AM – 9:00 PM</td>
+            </tr>
+            <tr>
+              <td><strong>Main Gate ➔ Oke-Fia / Old Garage</strong></td>
+              <td>Mini-Bus / Shared Cab</td>
+              <td>₦300 – ₦500</td>
+              <td>7:00 AM – 8:30 PM</td>
+            </tr>
+            <tr>
+              <td><strong>Osogbo ➔ Ibadan (Iwo Road)</strong></td>
+              <td>Inter-City Sienna / Bus</td>
+              <td>₦2,500 – ₦3,500</td>
+              <td>Morning Departures (7:00 AM – 11:00 AM)</td>
+            </tr>
+            <tr>
+              <td><strong>Osogbo ➔ Lagos (Ojota / Berger)</strong></td>
+              <td>Inter-City Sienna / Bus</td>
+              <td>₦6,500 – ₦8,500</td>
+              <td>6:30 AM – 10:00 AM</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Post a Ride Modal -->
+  <div class="modal-overlay hidden" id="rideModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Post a New Ride</h3>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <form id="rideForm" onsubmit="addRide(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Your Name</label>
+            <input type="text" id="posterName" placeholder="e.g., Sadiq I." required />
+          </div>
+          <div class="form-group">
+            <label>Department & Level</label>
+            <input type="text" id="posterDept" placeholder="e.g., 200L Comp. Sci" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Pickup Point</label>
+            <input type="text" id="pickup" placeholder="e.g., Main Gate" required />
+          </div>
+          <div class="form-group">
+            <label>Destination</label>
+            <input type="text" id="destination" placeholder="e.g., Oke-Fia" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Trip Type</label>
+            <select id="tripType">
+              <option value="Town Split">Town Split</option>
+              <option value="Holiday Travel">Holiday Travel</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Departure Time</label>
+            <input type="text" id="departureTime" placeholder="e.g., Today, 4:30 PM" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Available Seats</label>
+            <input type="number" id="seats" min="1" max="6" value="2" required />
+          </div>
+          <div class="form-group">
+            <label>Split Fare per Person (₦)</label>
+            <input type="text" id="fare" placeholder="e.g., ₦400" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Meetup Note / Contact Hint</label>
+          <textarea id="note" rows="2" placeholder="e.g., Waiting by the security post. Call 0803-XXX-XXXX." required></textarea>
+        </div>
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 0.4rem;">Publish to Board</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Initial sample data
+    const defaultRides = [
+      {
+        id: 1,
+        pickup: "Campus Main Gate",
+        destination: "Oke-Fia",
+        type: "Town Split",
+        time: "Today, 4:15 PM",
+        fare: "₦350 / person",
+        seats: 2,
+        poster: "Adebayo T.",
+        dept: "200L Computer Science",
+        note: "Splitting a cab to town right after afternoon lecture. Meeting at the gate shed."
+      },
+      {
+        id: 2,
+        pickup: "Main Gate",
+        destination: "Lagos (Berger)",
+        type: "Holiday Travel",
+        time: "Friday, 7:00 AM",
+        fare: "₦7,000 / seat",
+        seats: 3,
+        poster: "Zainab M.",
+        dept: "300L Accounting",
+        note: "Chartering a clean Sienna with 2 other students. Need 3 more verified students to fill up."
+      },
+      {
+        id: 3,
+        pickup: "Ota-Efun Junction",
+        destination: "Campus Gate",
+        type: "Town Split",
+        time: "Tomorrow, 7:40 AM",
+        fare: "₦250 / person",
+        seats: 1,
+        poster: "David K.",
+        dept: "200L Software Eng.",
+        note: "Heading in for 8 AM class. Looking for 1 person to share a ride quickly."
+      },
+      {
+        id: 4,
+        pickup: "School Park",
+        destination: "Ibadan (Iwo Road)",
+        type: "Holiday Travel",
+        time: "Saturday, 8:30 AM",
+        fare: "₦3,000 / seat",
+        seats: 0,
+        poster: "Mariam O.",
+        dept: "400L Mass Comm.",
+        note: "Traveling together in a group of 4. Contact me in case someone drops out."
+      }
+    ];
+
+    let rides = JSON.parse(localStorage.getItem("campusRides")) || defaultRides;
+    let selectedCategory = "All";
+
+    function saveRides() {
+      localStorage.setItem("campusRides", JSON.stringify(rides));
+    }
+
+    function setCategory(category, btn) {
+      selectedCategory = category;
+      document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      renderRides();
+    }
+
+    function renderRides() {
+      const query = document.getElementById("searchInput").value.toLowerCase();
+      const grid = document.getElementById("ridesGrid");
+      grid.innerHTML = "";
+
+      const filtered = rides.filter(ride => {
+        const matchesCategory = selectedCategory === "All" || ride.type === selectedCategory;
+        const matchesSearch =
+          ride.pickup.toLowerCase().includes(query) ||
+          ride.destination.toLowerCase().includes(query) ||
+          ride.note.toLowerCase().includes(query);
+        return matchesCategory && matchesSearch;
+      });
+
+      document.getElementById("rideCount").textContent = `Showing ${filtered.length} ride${filtered.length === 1 ? "" : "s"}`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<p style="color: var(--text-muted); grid-column: 1/-1;">No rides match your filter right now. Click "+ Post a Ride" to start one!</p>`;
+        return;
+      }
+
+      filtered.forEach(ride => {
+        const isFull = ride.seats <= 0;
+        const card = document.createElement("div");
+        card.className = "ride-card";
+        card.innerHTML = `
+          <div>
+            <div class="card-top">
+              <span class="status-badge ${isFull ? "full" : ""}">
+                ${isFull ? "🔴 Full" : `🟢 ${ride.seats} Seat${ride.seats > 1 ? "s" : ""} Left`}
+              </span>
+              <span class="type-tag">${ride.type}</span>
+            </div>
+            <div class="route">${ride.pickup} ➔ ${ride.destination}</div>
+            <div class="meta-row">
+              <span>🕒 ${ride.time}</span>
+              <span class="price">${ride.fare}</span>
+            </div>
+            <div class="note">${ride.note}</div>
+          </div>
+          <div>
+            <div class="poster-info">
+              <span><strong>${ride.poster}</strong> (${ride.dept})</span>
+              <span class="verified">✔ Verified</span>
+            </div>
+            <button class="btn-join" ${isFull ? "disabled" : ""} onclick="joinRide(${ride.id})">
+              ${isFull ? "Ride Full" : "Join Ride & Reserve Seat"}
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function joinRide(id) {
+      const ride = rides.find(r => r.id === id);
+      if (ride && ride.seats > 0) {
+        ride.seats -= 1;
+        saveRides();
+        renderRides();
+        alert(`Seat reserved for ${ride.pickup} ➔ ${ride.destination}!\n\nMeetup details: ${ride.note}`);
+      }
+    }
+
+    function openModal() {
+      document.getElementById("rideModal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+      document.getElementById("rideModal").classList.add("hidden");
+    }
+
+    function addRide(e) {
+      e.preventDefault();
+      const newRide = {
+        id: Date.now(),
+        pickup: document.getElementById("pickup").value,
+        destination: document.getElementById("destination").value,
+        type: document.getElementById("tripType").value,
+        time: document.getElementById("departureTime").value,
+        fare: document.getElementById("fare").value,
+        seats: parseInt(document.getElementById("seats").value, 10),
+        poster: document.getElementById("posterName").value,
+        dept: document.getElementById("posterDept").value,
+        note: document.getElementById("note").value
+      };
+
+      rides.unshift(newRide);
+      saveRides();
+      renderRides();
+      document.getElementById("rideForm").reset();
+      closeModal();
+    }
+
+    function switchTab(tab) {
+      const boardView = document.getElementById("boardView");
+      const faresView = document.getElementById("faresView");
+      const heroSection = document.getElementById("heroSection");
+      const tabBoard = document.getElementById("tabBoard");
+      const tabFares = document.getElementById("tabFares");
+
+      if (tab === "board") {
+        boardView.classList.remove("hidden");
+        heroSection.classList.remove("hidden");
+        faresView.classList.add("hidden");
+        tabBoard.classList.add("active");
+        tabFares.classList.remove("active");
+      } else {
+        boardView.classList.add("hidden");
+        heroSection.classList.add("hidden");
+        faresView.classList.remove("hidden");
+        tabFares.classList.add("active");
+        tabBoard.classList.remove("active");
+      }
+    }
+
+    // Initial render
+    renderRides();
+  </script>
+</body>
+</html>
